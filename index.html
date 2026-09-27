@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Bleach Quiz</title>
+<title>Bleach Quiz — Test</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -24,24 +24,51 @@
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 20px;
     padding: 40px;
-    max-width: 600px;
+    max-width: 650px;
     width: 100%;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
   }
 
-  h1 {
-    font-size: 1.8rem;
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     margin-bottom: 8px;
+  }
+
+  h1 {
+    font-size: 1.6rem;
     background: linear-gradient(90deg, #ff6b35, #f7c548);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
 
-  .subtitle {
+  .counter {
+    font-size: 0.85rem;
     color: #aaa;
-    font-size: 0.9rem;
+    white-space: nowrap;
+  }
+
+  .subtitle {
+    color: #888;
+    font-size: 0.85rem;
+    margin-bottom: 25px;
+  }
+
+  .progress-bar {
+    height: 6px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+    overflow: hidden;
     margin-bottom: 30px;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #ff6b35, #f7c548);
+    width: 0%;
+    transition: width 0.3s ease;
   }
 
   .question {
@@ -76,74 +103,345 @@
     transform: translateX(5px);
   }
 
-  .answer-btn:disabled {
-    cursor: not-allowed;
-  }
-
+  .answer-btn:disabled { cursor: not-allowed; }
   .answer-btn.correct {
     background: rgba(46, 204, 113, 0.3);
     border-color: #2ecc71;
     color: #2ecc71;
   }
-
   .answer-btn.wrong {
     background: rgba(231, 76, 60, 0.3);
     border-color: #e74c3c;
     color: #e74c3c;
   }
 
-  .result {
-    margin-top: 25px;
-    padding: 18px;
-    border-radius: 12px;
-    text-align: center;
-    font-size: 1.1rem;
-    font-weight: 600;
-    opacity: 0;
-    transition: opacity 0.3s ease;
+  .text-input-row {
+    display: flex;
+    gap: 10px;
   }
 
-  .result.show { opacity: 1; }
+  .text-input {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.08);
+    border: 2px solid rgba(255, 255, 255, 0.15);
+    color: #fff;
+    padding: 16px 20px;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-family: inherit;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .text-input:focus { border-color: #ff6b35; }
+  .text-input:disabled { opacity: 0.6; cursor: not-allowed; }
+
+  .submit-btn {
+    background: linear-gradient(90deg, #ff6b35, #f7c548);
+    border: none;
+    color: #1a1a1a;
+    padding: 16px 28px;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    transition: transform 0.15s;
+  }
+  .submit-btn:hover:not(:disabled) { transform: scale(1.05); }
+  .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .result {
+    margin-top: 20px;
+    padding: 16px;
+    border-radius: 12px;
+    text-align: center;
+    font-weight: 600;
+    display: none;
+  }
+  .result.show { display: block; }
   .result.correct { background: rgba(46, 204, 113, 0.15); color: #2ecc71; }
   .result.wrong { background: rgba(231, 76, 60, 0.15); color: #e74c3c; }
+
+  .next-btn {
+    margin-top: 20px;
+    width: 100%;
+    background: linear-gradient(90deg, #ff6b35, #f7c548);
+    border: none;
+    color: #1a1a1a;
+    padding: 16px;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    display: none;
+  }
+  .next-btn.show { display: block; }
+
+  .final-screen { text-align: center; padding: 20px 0; }
+  .final-score {
+    font-size: 3.5rem;
+    font-weight: 800;
+    background: linear-gradient(90deg, #ff6b35, #f7c548);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin: 10px 0;
+  }
+  .final-msg { color: #ccc; margin-bottom: 25px; }
+
+  .restart-btn {
+    background: linear-gradient(90deg, #ff6b35, #f7c548);
+    border: none;
+    color: #1a1a1a;
+    padding: 16px 40px;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+  }
 </style>
 </head>
 <body>
-  <div class="quiz-container">
-    <h1>Bleach Quiz</h1>
-    <p class="subtitle">Test your Soul Reaper knowledge</p>
+  <div class="quiz-container" id="quiz"></div>
 
-    <p class="question">How many times does Rukia appear on a Volume cover of the Bleach manga?</p>
+<script>
+/* ============================================================
+   QUIZ DATA — edit this array to change questions
+   ============================================================ */
+const QUESTIONS = [
+  {
+    type: "mc",
+    question: "How old was Ichigo at the start of the series?",
+    answers: ["16", "18", "17", "15"],
+    correct: "15"
+  },
+  {
+    type: "mc",
+    question: "What was the name of Uryū's grandfather and master?",
+    answers: ["Shūsuke", "Jin", "Sōken", "Muramasa"],
+    correct: "Sōken"
+  },
+  {
+    type: "tf",
+    question: "The Hōgyoku is often associated with Aizen, but in fact, Kisuke was the one to create the Complete Hōgyoku.",
+    correct: false
+  },
+  {
+    type: "mc",
+    question: "Which of these Bankai is canonically the first and oldest to exist in the series?",
+    answers: [
+      "Shatatsu Karagara Shigarami no Tsuji",
+      "Katen Kyōkotsu: Karamatsu Shinjū",
+      "Zanka no Tachi",
+      "Shin'uchi: Shirafude Ichimonji"
+    ],
+    correct: "Shin'uchi: Shirafude Ichimonji"
+  },
+  {
+    type: "mc",
+    question: "Who was the first squad captain of the Gotei 13 that Ichigo encountered after they entered Soul Society?",
+    answers: ["Byakuya Kuchiki", "Gin Ichimaru", "Kenpachi Zaraki", "Aizen Sōsuke"],
+    correct: "Gin Ichimaru"
+  },
+  {
+    type: "open",
+    question: "During Aizen's sentencing following his defeat, he taunted members of Central 46 and consequently got his sentence increased to 20,000 years. What was the original number of years he was given?",
+    accepted: ["18,800", "18800"]
+  }
+];
 
-    <div class="answers">
-      <button class="answer-btn" data-correct="false">1</button>
-      <button class="answer-btn" data-correct="false">4</button>
-      <button class="answer-btn" data-correct="false">2</button>
-      <button class="answer-btn" data-correct="true">3</button>
+/* ============================================================
+   ENGINE — you don't need to edit below this line
+   ============================================================ */
+
+// Normalize a string for comparison: lowercase, strip spaces,
+// commas, periods, and other punctuation.
+function normalize(str) {
+  return String(str)
+    .toLowerCase()
+    .replace(/[,\.\s\-'’]/g, "")
+    .trim();
+}
+
+const quizEl = document.getElementById("quiz");
+let currentIndex = 0;
+let score = 0;
+let locked = false;
+
+function renderQuestion() {
+  locked = false;
+  const q = QUESTIONS[currentIndex];
+  const total = QUESTIONS.length;
+  const progressPct = (currentIndex / total) * 100;
+
+  let answersHTML = "";
+
+  if (q.type === "mc" || q.type === "tf") {
+    let choices;
+    if (q.type === "tf") {
+      choices = [true, false];
+    } else {
+      choices = q.answers;
+    }
+
+    answersHTML = `<div class="answers">` +
+      choices.map((c, i) => {
+        const label = q.type === "tf" ? (c ? "True" : "False") : c;
+        const dataVal = q.type === "tf" ? String(c) : c;
+        return `<button class="answer-btn" data-idx="${i}" data-val="${escapeAttr(dataVal)}">${escapeHTML(label)}</button>`;
+      }).join("") +
+      `</div>`;
+  } else if (q.type === "open") {
+    answersHTML = `
+      <div class="text-input-row">
+        <input type="text" class="text-input" id="openInput" placeholder="Type your answer..." autocomplete="off">
+        <button class="submit-btn" id="submitOpen">Submit</button>
+      </div>
+    `;
+  }
+
+  quizEl.innerHTML = `
+    <div class="header">
+      <h1>Bleach Quiz</h1>
+      <span class="counter">${currentIndex + 1} / ${total}</span>
     </div>
-
+    <p class="subtitle">Test your Soul Reaper knowledge</p>
+    <div class="progress-bar"><div class="progress-fill" style="width:${progressPct}%"></div></div>
+    <p class="question">${escapeHTML(q.question)}</p>
+    ${answersHTML}
     <div class="result" id="result"></div>
-  </div>
+    <button class="next-btn" id="nextBtn">Next →</button>
+  `;
 
-  <script>
-    const buttons = document.querySelectorAll('.answer-btn');
-    const result = document.getElementById('result');
-
-    buttons.forEach(btn => {
-      btn.addEventListener('click', () => {
-        const isCorrect = btn.dataset.correct === 'true';
-
-        buttons.forEach(b => {
-          b.disabled = true;
-          if (b.dataset.correct === 'true') b.classList.add('correct');
-        });
-
-        if (!isCorrect) btn.classList.add('wrong');
-
-        result.textContent = isCorrect ? '✅ Correct! Nice one.' : '❌ Wrong! The answer was 3.';
-        result.className = 'result show ' + (isCorrect ? 'correct' : 'wrong');
-      });
+  // Wire up MC / TF
+  if (q.type === "mc" || q.type === "tf") {
+    quizEl.querySelectorAll(".answer-btn").forEach(btn => {
+      btn.addEventListener("click", () => handleChoice(btn, q));
     });
-  </script>
+  }
+
+  // Wire up open-ended
+  if (q.type === "open") {
+    const input = document.getElementById("openInput");
+    const submit = document.getElementById("submitOpen");
+    submit.addEventListener("click", () => handleOpen(input, q));
+    input.addEventListener("keydown", e => {
+      if (e.key === "Enter") handleOpen(input, q);
+    });
+    input.focus();
+  }
+
+  document.getElementById("nextBtn").addEventListener("click", nextQuestion);
+}
+
+function handleChoice(btn, q) {
+  if (locked) return;
+  locked = true;
+
+  const chosen = btn.dataset.val;
+  let isCorrect;
+
+  if (q.type === "tf") {
+    isCorrect = (chosen === String(q.correct));
+  } else {
+    isCorrect = (chosen === q.correct);
+  }
+
+  // Disable all, mark correct one
+  quizEl.querySelectorAll(".answer-btn").forEach(b => {
+    b.disabled = true;
+    const bVal = b.dataset.val;
+    const correctVal = q.type === "tf" ? String(q.correct) : q.correct;
+    if (bVal === correctVal) b.classList.add("correct");
+  });
+
+  if (!isCorrect) btn.classList.add("wrong");
+
+  if (isCorrect) score++;
+  showResult(isCorrect, q);
+}
+
+function handleOpen(input, q) {
+  if (locked) return;
+  const raw = input.value.trim();
+  if (raw === "") return;
+
+  locked = true;
+  input.disabled = true;
+  document.getElementById("submitOpen").disabled = true;
+
+  const userNorm = normalize(raw);
+  const isCorrect = q.accepted.some(a => normalize(a) === userNorm);
+
+  if (isCorrect) score++;
+  showResult(isCorrect, q, raw);
+}
+
+function showResult(isCorrect, q, userRaw) {
+  const result = document.getElementById("result");
+  result.classList.add("show", isCorrect ? "correct" : "wrong");
+
+  if (isCorrect) {
+    result.textContent = "✅ Correct!";
+  } else {
+    let correctText = "";
+    if (q.type === "tf") correctText = q.correct ? "True" : "False";
+    else if (q.type === "mc") correctText = q.correct;
+    else if (q.type === "open") correctText = q.accepted[0];
+    result.textContent = `❌ Wrong! Correct answer: ${correctText}`;
+  }
+
+  document.getElementById("nextBtn").classList.add("show");
+}
+
+function nextQuestion() {
+  currentIndex++;
+  if (currentIndex >= QUESTIONS.length) {
+    renderFinal();
+  } else {
+    renderQuestion();
+  }
+}
+
+function renderFinal() {
+  const total = QUESTIONS.length;
+  const pct = Math.round((score / total) * 100);
+  let msg = "";
+  if (pct === 100) msg = "Perfect! You're a true Soul Reaper. ⚔️";
+  else if (pct >= 80) msg = "Excellent! Captain-level knowledge.";
+  else if (pct >= 60) msg = "Not bad! Lieutenant material.";
+  else if (pct >= 40) msg = "Keep training — you've got potential.";
+  else msg = "Back to the Soul Reaper Academy for you. 📚";
+
+  quizEl.innerHTML = `
+    <div class="final-screen">
+      <h1>Quiz Complete</h1>
+      <div class="final-score">${score} / ${total}</div>
+      <p class="final-msg">${msg}</p>
+      <button class="restart-btn" id="restartBtn">Try Again</button>
+    </div>
+  `;
+  document.getElementById("restartBtn").addEventListener("click", () => {
+    currentIndex = 0;
+    score = 0;
+    renderQuestion();
+  });
+}
+
+function escapeHTML(str) {
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+function escapeAttr(str) {
+  return String(str).replace(/"/g, "&quot;");
+}
+
+// Start
+renderQuestion();
+</script>
 </body>
 </html>
