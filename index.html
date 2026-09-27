@@ -95,7 +95,6 @@
   .progress-bar {
     height: 4px;
     background: #e1e6ed;
-    border-radius: 0;
     overflow: hidden;
     margin-bottom: 30px;
     position: relative;
@@ -121,6 +120,34 @@
     z-index: 1;
   }
 
+  .audio-wrap {
+    margin: 0 auto 24px;
+    text-align: center;
+    position: relative;
+    z-index: 1;
+  }
+
+  .audio-play-btn {
+    background: #1e3a5f;
+    color: #fdfdfd;
+    border: 2px solid #1e3a5f;
+    padding: 16px 40px;
+    border-radius: 3px;
+    font-family: Georgia, serif;
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: all 0.18s;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .audio-play-btn:hover { background: #c0392b; border-color: #c0392b; }
+  .audio-play-btn.playing { background: #c0392b; border-color: #c0392b; }
+
+  .audio-play-btn .icon { font-size: 1.2rem; }
+
   .question {
     font-family: Georgia, serif;
     font-size: 1.15rem;
@@ -129,10 +156,6 @@
     color: #1a2332;
     position: relative;
     z-index: 1;
-  }
-
-  .question::first-letter {
-    font-size: 1.05em;
   }
 
   .answers {
@@ -154,7 +177,6 @@
     cursor: pointer;
     transition: all 0.18s ease;
     font-family: Georgia, serif;
-    position: relative;
   }
 
   .answer-btn:hover:not(:disabled) {
@@ -198,10 +220,7 @@
     outline: none;
     transition: border-color 0.2s;
   }
-  .text-input:focus {
-    border-color: #c0392b;
-    background: #fff;
-  }
+  .text-input:focus { border-color: #c0392b; background: #fff; }
   .text-input:disabled { opacity: 0.6; cursor: not-allowed; }
 
   .submit-btn {
@@ -217,16 +236,12 @@
     letter-spacing: 0.5px;
     transition: all 0.18s;
   }
-  .submit-btn:hover:not(:disabled) {
-    background: #c0392b;
-    border-color: #c0392b;
-  }
+  .submit-btn:hover:not(:disabled) { background: #c0392b; border-color: #c0392b; }
   .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
   .result {
     margin-top: 22px;
     padding: 16px;
-    border-radius: 3px;
     text-align: center;
     font-weight: 700;
     font-family: Georgia, serif;
@@ -236,16 +251,8 @@
     border-left: 4px solid;
   }
   .result.show { display: block; }
-  .result.correct {
-    background: #e8f5ec;
-    color: #1e5c37;
-    border-color: #2e7d4f;
-  }
-  .result.wrong {
-    background: #fbeae8;
-    color: #a02d20;
-    border-color: #c0392b;
-  }
+  .result.correct { background: #e8f5ec; color: #1e5c37; border-color: #2e7d4f; }
+  .result.wrong { background: #fbeae8; color: #a02d20; border-color: #c0392b; }
 
   .next-btn {
     margin-top: 22px;
@@ -266,10 +273,7 @@
     z-index: 1;
   }
   .next-btn.show { display: block; }
-  .next-btn:hover {
-    background: #1e3a5f;
-    border-color: #1e3a5f;
-  }
+  .next-btn:hover { background: #1e3a5f; border-color: #1e3a5f; }
 
   .final-screen {
     text-align: center;
@@ -306,10 +310,7 @@
     letter-spacing: 1px;
     transition: all 0.18s;
   }
-  .restart-btn:hover {
-    background: #c0392b;
-    border-color: #c0392b;
-  }
+  .restart-btn:hover { background: #c0392b; border-color: #c0392b; }
 </style>
 </head>
 <body>
@@ -382,6 +383,13 @@ const QUESTIONS = [
     question: "Who created the Shinigami Research and Development Institute?",
     answers: ["Mayuri", "Kisuke", "Aizen", "Senjumaru"],
     correct: "Kisuke"
+  },
+  {
+    type: "mc",
+    audio: "images/cero.mp3",
+    question: "Which of these Arrancar techniques produces this sound?",
+    answers: ["Sonido", "Hierro", "Cero", "Bala"],
+    correct: "Cero"
   }
 ];
 
@@ -399,9 +407,12 @@ const quizEl = document.getElementById("quiz");
 let currentIndex = 0;
 let score = 0;
 let locked = false;
+let currentAudio = null;
 
 function renderQuestion() {
   locked = false;
+  if (currentAudio) { currentAudio.pause(); currentAudio = null; }
+
   const q = QUESTIONS[currentIndex];
   const total = QUESTIONS.length;
   const progressPct = (currentIndex / total) * 100;
@@ -428,6 +439,14 @@ function renderQuestion() {
     ? `<img src="${escapeAttr(q.image)}" alt="Question image" class="question-image" onerror="this.style.display='none'">`
     : "";
 
+  const audioHTML = q.audio
+    ? `<div class="audio-wrap">
+         <button class="audio-play-btn" id="audioPlay">
+           <span class="icon">🔊</span><span id="audioLabel">PLAY AUDIO</span>
+         </button>
+       </div>`
+    : "";
+
   quizEl.innerHTML = `
     <div class="header">
       <h1>Bleach Quiz</h1>
@@ -438,6 +457,7 @@ function renderQuestion() {
     <div class="divider-red"></div>
     <div class="progress-bar"><div class="progress-fill" style="width:${progressPct}%"></div></div>
     ${imageHTML}
+    ${audioHTML}
     <p class="question">${escapeHTML(q.question)}</p>
     ${answersHTML}
     <div class="result" id="result"></div>
@@ -458,6 +478,28 @@ function renderQuestion() {
       if (e.key === "Enter") handleOpen(input, q);
     });
     input.focus();
+  }
+
+  if (q.audio) {
+    const playBtn = document.getElementById("audioPlay");
+    const label = document.getElementById("audioLabel");
+    currentAudio = new Audio(q.audio);
+    currentAudio.addEventListener("ended", () => {
+      playBtn.classList.remove("playing");
+      label.textContent = "PLAY AUDIO";
+    });
+    playBtn.addEventListener("click", () => {
+      if (currentAudio.paused) {
+        currentAudio.currentTime = 0;
+        currentAudio.play();
+        playBtn.classList.add("playing");
+        label.textContent = "PLAYING...";
+      } else {
+        currentAudio.pause();
+        playBtn.classList.remove("playing");
+        label.textContent = "PLAY AUDIO";
+      }
+    });
   }
 
   document.getElementById("nextBtn").addEventListener("click", nextQuestion);
@@ -515,12 +557,14 @@ function showResult(isCorrect, q) {
 }
 
 function nextQuestion() {
+  if (currentAudio) { currentAudio.pause(); currentAudio = null; }
   currentIndex++;
   if (currentIndex >= QUESTIONS.length) renderFinal();
   else renderQuestion();
 }
 
 function renderFinal() {
+  if (currentAudio) { currentAudio.pause(); currentAudio = null; }
   const total = QUESTIONS.length;
   const pct = Math.round((score / total) * 100);
   let msg = "";
@@ -548,10 +592,7 @@ function renderFinal() {
 }
 
 function escapeHTML(str) {
-  return String(str)
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;");
+  return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 function escapeAttr(str) {
   return String(str).replace(/"/g, "&quot;");
