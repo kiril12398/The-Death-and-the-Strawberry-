@@ -3,203 +3,312 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Bleach Quiz — Test</title>
+<title>Bleach Quiz</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
 
   body {
-    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-    background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+    font-family: Georgia, 'Times New Roman', serif;
+    background: linear-gradient(135deg, #e8ecf1 0%, #c9d4e0 100%);
     min-height: 100vh;
     display: flex;
     align-items: center;
     justify-content: center;
     padding: 20px;
-    color: #fff;
+    color: #1a2332;
   }
 
   .quiz-container {
-    background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 20px;
-    padding: 40px;
-    max-width: 650px;
+    background: #fdfdfd;
+    border: 3px solid #1e3a5f;
+    border-radius: 4px;
+    padding: 45px 50px;
+    max-width: 680px;
     width: 100%;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    box-shadow:
+      0 0 0 1px #fdfdfd,
+      0 0 0 4px #1e3a5f,
+      0 20px 50px rgba(30, 58, 95, 0.25);
+    position: relative;
+  }
+
+  .quiz-container::before {
+    content: "";
+    position: absolute;
+    top: 8px; left: 8px; right: 8px; bottom: 8px;
+    border: 1px solid rgba(30, 58, 95, 0.2);
+    border-radius: 2px;
+    pointer-events: none;
   }
 
   .header {
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    margin-bottom: 8px;
+    align-items: baseline;
+    margin-bottom: 4px;
+    position: relative;
+    z-index: 1;
   }
 
   h1 {
-    font-size: 1.6rem;
-    background: linear-gradient(90deg, #ff6b35, #f7c548);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    font-family: Georgia, serif;
+    font-size: 1.9rem;
+    font-weight: 700;
+    color: #1e3a5f;
+    letter-spacing: 0.5px;
   }
 
   .counter {
-    font-size: 0.85rem;
-    color: #aaa;
+    font-family: 'Courier New', monospace;
+    font-size: 0.9rem;
+    color: #8a94a6;
     white-space: nowrap;
+    font-weight: 700;
   }
 
   .subtitle {
-    color: #888;
-    font-size: 0.85rem;
-    margin-bottom: 25px;
+    font-family: Georgia, serif;
+    font-style: italic;
+    color: #6b7a8f;
+    font-size: 0.9rem;
+    margin-bottom: 22px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .divider {
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #1e3a5f 20%, #1e3a5f 80%, transparent);
+    margin-bottom: 8px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .divider-red {
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #c0392b 30%, #c0392b 70%, transparent);
+    margin-bottom: 26px;
+    position: relative;
+    z-index: 1;
   }
 
   .progress-bar {
-    height: 6px;
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 3px;
+    height: 4px;
+    background: #e1e6ed;
+    border-radius: 0;
     overflow: hidden;
     margin-bottom: 30px;
+    position: relative;
+    z-index: 1;
   }
 
   .progress-fill {
     height: 100%;
-    background: linear-gradient(90deg, #ff6b35, #f7c548);
+    background: linear-gradient(90deg, #1e3a5f, #c0392b);
     width: 0%;
-    transition: width 0.3s ease;
+    transition: width 0.4s ease;
+  }
+
+  .question-image {
+    display: block;
+    max-width: 100%;
+    max-height: 300px;
+    margin: 0 auto 22px;
+    border: 2px solid #1e3a5f;
+    padding: 4px;
+    background: #fdfdfd;
+    position: relative;
+    z-index: 1;
   }
 
   .question {
+    font-family: Georgia, serif;
     font-size: 1.15rem;
-    line-height: 1.5;
-    margin-bottom: 25px;
-    color: #f0f0f0;
+    line-height: 1.6;
+    margin-bottom: 26px;
+    color: #1a2332;
+    position: relative;
+    z-index: 1;
+  }
+
+  .question::first-letter {
+    font-size: 1.05em;
   }
 
   .answers {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 10px;
+    position: relative;
+    z-index: 1;
   }
 
   .answer-btn {
-    background: rgba(255, 255, 255, 0.08);
-    border: 2px solid rgba(255, 255, 255, 0.15);
-    color: #fff;
-    padding: 16px 20px;
-    border-radius: 12px;
+    background: #f4f7fa;
+    border: 2px solid #c8d2de;
+    color: #1a2332;
+    padding: 15px 22px;
+    border-radius: 3px;
     font-size: 1rem;
     text-align: left;
     cursor: pointer;
-    transition: all 0.2s ease;
-    font-family: inherit;
+    transition: all 0.18s ease;
+    font-family: Georgia, serif;
+    position: relative;
   }
 
   .answer-btn:hover:not(:disabled) {
-    background: rgba(255, 107, 53, 0.2);
-    border-color: #ff6b35;
-    transform: translateX(5px);
+    background: #fff;
+    border-color: #c0392b;
+    box-shadow: 0 3px 10px rgba(192, 57, 43, 0.15);
+    transform: translateX(4px);
   }
 
   .answer-btn:disabled { cursor: not-allowed; }
+
   .answer-btn.correct {
-    background: rgba(46, 204, 113, 0.3);
-    border-color: #2ecc71;
-    color: #2ecc71;
+    background: #e8f5ec;
+    border-color: #2e7d4f;
+    color: #1e5c37;
+    font-weight: 700;
   }
+
   .answer-btn.wrong {
-    background: rgba(231, 76, 60, 0.3);
-    border-color: #e74c3c;
-    color: #e74c3c;
+    background: #fbeae8;
+    border-color: #c0392b;
+    color: #a02d20;
   }
 
   .text-input-row {
     display: flex;
     gap: 10px;
+    position: relative;
+    z-index: 1;
   }
 
   .text-input {
     flex: 1;
-    background: rgba(255, 255, 255, 0.08);
-    border: 2px solid rgba(255, 255, 255, 0.15);
-    color: #fff;
-    padding: 16px 20px;
-    border-radius: 12px;
+    background: #f4f7fa;
+    border: 2px solid #c8d2de;
+    color: #1a2332;
+    padding: 15px 20px;
+    border-radius: 3px;
     font-size: 1rem;
-    font-family: inherit;
+    font-family: Georgia, serif;
     outline: none;
     transition: border-color 0.2s;
   }
-  .text-input:focus { border-color: #ff6b35; }
+  .text-input:focus {
+    border-color: #c0392b;
+    background: #fff;
+  }
   .text-input:disabled { opacity: 0.6; cursor: not-allowed; }
 
   .submit-btn {
-    background: linear-gradient(90deg, #ff6b35, #f7c548);
-    border: none;
-    color: #1a1a1a;
-    padding: 16px 28px;
-    border-radius: 12px;
+    background: #1e3a5f;
+    border: 2px solid #1e3a5f;
+    color: #fdfdfd;
+    padding: 15px 30px;
+    border-radius: 3px;
     font-size: 1rem;
     font-weight: 700;
     cursor: pointer;
-    font-family: inherit;
-    transition: transform 0.15s;
+    font-family: Georgia, serif;
+    letter-spacing: 0.5px;
+    transition: all 0.18s;
   }
-  .submit-btn:hover:not(:disabled) { transform: scale(1.05); }
+  .submit-btn:hover:not(:disabled) {
+    background: #c0392b;
+    border-color: #c0392b;
+  }
   .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
   .result {
-    margin-top: 20px;
+    margin-top: 22px;
     padding: 16px;
-    border-radius: 12px;
+    border-radius: 3px;
     text-align: center;
-    font-weight: 600;
+    font-weight: 700;
+    font-family: Georgia, serif;
     display: none;
+    position: relative;
+    z-index: 1;
+    border-left: 4px solid;
   }
   .result.show { display: block; }
-  .result.correct { background: rgba(46, 204, 113, 0.15); color: #2ecc71; }
-  .result.wrong { background: rgba(231, 76, 60, 0.15); color: #e74c3c; }
+  .result.correct {
+    background: #e8f5ec;
+    color: #1e5c37;
+    border-color: #2e7d4f;
+  }
+  .result.wrong {
+    background: #fbeae8;
+    color: #a02d20;
+    border-color: #c0392b;
+  }
 
   .next-btn {
-    margin-top: 20px;
+    margin-top: 22px;
     width: 100%;
-    background: linear-gradient(90deg, #ff6b35, #f7c548);
-    border: none;
-    color: #1a1a1a;
+    background: #c0392b;
+    border: 2px solid #c0392b;
+    color: #fdfdfd;
     padding: 16px;
-    border-radius: 12px;
+    border-radius: 3px;
     font-size: 1rem;
     font-weight: 700;
     cursor: pointer;
-    font-family: inherit;
+    font-family: Georgia, serif;
+    letter-spacing: 1px;
     display: none;
+    transition: all 0.18s;
+    position: relative;
+    z-index: 1;
   }
   .next-btn.show { display: block; }
-
-  .final-screen { text-align: center; padding: 20px 0; }
-  .final-score {
-    font-size: 3.5rem;
-    font-weight: 800;
-    background: linear-gradient(90deg, #ff6b35, #f7c548);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    margin: 10px 0;
+  .next-btn:hover {
+    background: #1e3a5f;
+    border-color: #1e3a5f;
   }
-  .final-msg { color: #ccc; margin-bottom: 25px; }
+
+  .final-screen {
+    text-align: center;
+    padding: 25px 0;
+    position: relative;
+    z-index: 1;
+  }
+  .final-score {
+    font-family: Georgia, serif;
+    font-size: 4rem;
+    font-weight: 700;
+    color: #c0392b;
+    margin: 10px 0;
+    letter-spacing: 2px;
+  }
+  .final-msg {
+    font-family: Georgia, serif;
+    font-style: italic;
+    color: #4a5568;
+    margin-bottom: 30px;
+    font-size: 1.05rem;
+  }
 
   .restart-btn {
-    background: linear-gradient(90deg, #ff6b35, #f7c548);
-    border: none;
-    color: #1a1a1a;
-    padding: 16px 40px;
-    border-radius: 12px;
+    background: #1e3a5f;
+    border: 2px solid #1e3a5f;
+    color: #fdfdfd;
+    padding: 16px 45px;
+    border-radius: 3px;
     font-size: 1rem;
     font-weight: 700;
     cursor: pointer;
-    font-family: inherit;
+    font-family: Georgia, serif;
+    letter-spacing: 1px;
+    transition: all 0.18s;
+  }
+  .restart-btn:hover {
+    background: #c0392b;
+    border-color: #c0392b;
   }
 </style>
 </head>
@@ -208,7 +317,7 @@
 
 <script>
 /* ============================================================
-   QUIZ DATA — edit this array to change questions
+   QUIZ DATA
    ============================================================ */
 const QUESTIONS = [
   {
@@ -249,15 +358,36 @@ const QUESTIONS = [
     type: "open",
     question: "During Aizen's sentencing following his defeat, he taunted members of Central 46 and consequently got his sentence increased to 20,000 years. What was the original number of years he was given?",
     accepted: ["18,800", "18800"]
+  },
+  {
+    type: "open",
+    image: "images/jugram-angry.jpg",
+    question: "Make Jugram happy and spell his family name correctly.",
+    accepted: ["Haschwalth", "haschwalth"]
+  },
+  {
+    type: "mc",
+    question: "Before Kenpachi Zaraki became the captain of Squad 11, how many previous Kenpachi had there been?",
+    answers: ["10", "11", "8", "9"],
+    correct: "10"
+  },
+  {
+    type: "mc",
+    question: "What was the name of Rukia's sister?",
+    answers: ["Riruka", "Nozomi", "Senna", "Hisana"],
+    correct: "Hisana"
+  },
+  {
+    type: "mc",
+    question: "Who created the Shinigami Research and Development Institute?",
+    answers: ["Mayuri", "Kisuke", "Aizen", "Senjumaru"],
+    correct: "Kisuke"
   }
 ];
 
 /* ============================================================
-   ENGINE — you don't need to edit below this line
+   ENGINE
    ============================================================ */
-
-// Normalize a string for comparison: lowercase, strip spaces,
-// commas, periods, and other punctuation.
 function normalize(str) {
   return String(str)
     .toLowerCase()
@@ -277,22 +407,14 @@ function renderQuestion() {
   const progressPct = (currentIndex / total) * 100;
 
   let answersHTML = "";
-
   if (q.type === "mc" || q.type === "tf") {
-    let choices;
-    if (q.type === "tf") {
-      choices = [true, false];
-    } else {
-      choices = q.answers;
-    }
-
+    const choices = q.type === "tf" ? [true, false] : q.answers;
     answersHTML = `<div class="answers">` +
       choices.map((c, i) => {
         const label = q.type === "tf" ? (c ? "True" : "False") : c;
         const dataVal = q.type === "tf" ? String(c) : c;
         return `<button class="answer-btn" data-idx="${i}" data-val="${escapeAttr(dataVal)}">${escapeHTML(label)}</button>`;
-      }).join("") +
-      `</div>`;
+      }).join("") + `</div>`;
   } else if (q.type === "open") {
     answersHTML = `
       <div class="text-input-row">
@@ -302,27 +424,32 @@ function renderQuestion() {
     `;
   }
 
+  const imageHTML = q.image
+    ? `<img src="${escapeAttr(q.image)}" alt="Question image" class="question-image" onerror="this.style.display='none'">`
+    : "";
+
   quizEl.innerHTML = `
     <div class="header">
       <h1>Bleach Quiz</h1>
       <span class="counter">${currentIndex + 1} / ${total}</span>
     </div>
     <p class="subtitle">Test your Soul Reaper knowledge</p>
+    <div class="divider"></div>
+    <div class="divider-red"></div>
     <div class="progress-bar"><div class="progress-fill" style="width:${progressPct}%"></div></div>
+    ${imageHTML}
     <p class="question">${escapeHTML(q.question)}</p>
     ${answersHTML}
     <div class="result" id="result"></div>
-    <button class="next-btn" id="nextBtn">Next →</button>
+    <button class="next-btn" id="nextBtn">NEXT →</button>
   `;
 
-  // Wire up MC / TF
   if (q.type === "mc" || q.type === "tf") {
     quizEl.querySelectorAll(".answer-btn").forEach(btn => {
       btn.addEventListener("click", () => handleChoice(btn, q));
     });
   }
 
-  // Wire up open-ended
   if (q.type === "open") {
     const input = document.getElementById("openInput");
     const submit = document.getElementById("submitOpen");
@@ -341,24 +468,15 @@ function handleChoice(btn, q) {
   locked = true;
 
   const chosen = btn.dataset.val;
-  let isCorrect;
+  const correctVal = q.type === "tf" ? String(q.correct) : q.correct;
+  const isCorrect = (chosen === correctVal);
 
-  if (q.type === "tf") {
-    isCorrect = (chosen === String(q.correct));
-  } else {
-    isCorrect = (chosen === q.correct);
-  }
-
-  // Disable all, mark correct one
   quizEl.querySelectorAll(".answer-btn").forEach(b => {
     b.disabled = true;
-    const bVal = b.dataset.val;
-    const correctVal = q.type === "tf" ? String(q.correct) : q.correct;
-    if (bVal === correctVal) b.classList.add("correct");
+    if (b.dataset.val === correctVal) b.classList.add("correct");
   });
 
   if (!isCorrect) btn.classList.add("wrong");
-
   if (isCorrect) score++;
   showResult(isCorrect, q);
 }
@@ -379,18 +497,18 @@ function handleOpen(input, q) {
   showResult(isCorrect, q, raw);
 }
 
-function showResult(isCorrect, q, userRaw) {
+function showResult(isCorrect, q) {
   const result = document.getElementById("result");
   result.classList.add("show", isCorrect ? "correct" : "wrong");
 
   if (isCorrect) {
-    result.textContent = "✅ Correct!";
+    result.textContent = "✓ Correct!";
   } else {
     let correctText = "";
     if (q.type === "tf") correctText = q.correct ? "True" : "False";
     else if (q.type === "mc") correctText = q.correct;
     else if (q.type === "open") correctText = q.accepted[0];
-    result.textContent = `❌ Wrong! Correct answer: ${correctText}`;
+    result.textContent = `✗ Wrong — correct answer: ${correctText}`;
   }
 
   document.getElementById("nextBtn").classList.add("show");
@@ -398,29 +516,28 @@ function showResult(isCorrect, q, userRaw) {
 
 function nextQuestion() {
   currentIndex++;
-  if (currentIndex >= QUESTIONS.length) {
-    renderFinal();
-  } else {
-    renderQuestion();
-  }
+  if (currentIndex >= QUESTIONS.length) renderFinal();
+  else renderQuestion();
 }
 
 function renderFinal() {
   const total = QUESTIONS.length;
   const pct = Math.round((score / total) * 100);
   let msg = "";
-  if (pct === 100) msg = "Perfect! You're a true Soul Reaper. ⚔️";
-  else if (pct >= 80) msg = "Excellent! Captain-level knowledge.";
-  else if (pct >= 60) msg = "Not bad! Lieutenant material.";
-  else if (pct >= 40) msg = "Keep training — you've got potential.";
-  else msg = "Back to the Soul Reaper Academy for you. 📚";
+  if (pct === 100) msg = "Perfect score. A true Captain of the Gotei 13.";
+  else if (pct >= 80) msg = "Excellent — Lieutenant-level knowledge.";
+  else if (pct >= 60) msg = "Not bad. You've earned your seated position.";
+  else if (pct >= 40) msg = "Keep training at the Shin'ō Academy.";
+  else msg = "Back to the academy for you.";
 
   quizEl.innerHTML = `
     <div class="final-screen">
       <h1>Quiz Complete</h1>
+      <div class="divider"></div>
+      <div class="divider-red"></div>
       <div class="final-score">${score} / ${total}</div>
       <p class="final-msg">${msg}</p>
-      <button class="restart-btn" id="restartBtn">Try Again</button>
+      <button class="restart-btn" id="restartBtn">TRY AGAIN</button>
     </div>
   `;
   document.getElementById("restartBtn").addEventListener("click", () => {
@@ -440,7 +557,6 @@ function escapeAttr(str) {
   return String(str).replace(/"/g, "&quot;");
 }
 
-// Start
 renderQuestion();
 </script>
 </body>
