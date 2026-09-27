@@ -22,7 +22,7 @@
     background: #fdfdfd;
     border: 3px solid #1e3a5f;
     border-radius: 4px;
-    padding: 45px 50px;
+    padding: 45px 50px 25px;
     max-width: 680px;
     width: 100%;
     box-shadow:
@@ -39,6 +39,18 @@
     border: 1px solid rgba(30, 58, 95, 0.2);
     border-radius: 2px;
     pointer-events: none;
+  }
+
+  /* ===== Logo ===== */
+  .logo-wrap {
+    text-align: center;
+    margin-bottom: 20px;
+    position: relative;
+    z-index: 1;
+  }
+  .logo-img {
+    max-height: 70px;
+    max-width: 100%;
   }
 
   .header {
@@ -83,7 +95,6 @@
     position: relative;
     z-index: 1;
   }
-
   .divider-red {
     height: 2px;
     background: linear-gradient(90deg, transparent, #c0392b 30%, #c0392b 70%, transparent);
@@ -100,7 +111,6 @@
     position: relative;
     z-index: 1;
   }
-
   .progress-fill {
     height: 100%;
     background: linear-gradient(90deg, #1e3a5f, #c0392b);
@@ -126,7 +136,6 @@
     position: relative;
     z-index: 1;
   }
-
   .audio-play-btn {
     background: #1e3a5f;
     color: #fdfdfd;
@@ -145,7 +154,6 @@
   }
   .audio-play-btn:hover { background: #c0392b; border-color: #c0392b; }
   .audio-play-btn.playing { background: #c0392b; border-color: #c0392b; }
-
   .audio-play-btn .icon { font-size: 1.2rem; }
 
   .question {
@@ -178,23 +186,19 @@
     transition: all 0.18s ease;
     font-family: Georgia, serif;
   }
-
   .answer-btn:hover:not(:disabled) {
     background: #fff;
     border-color: #c0392b;
     box-shadow: 0 3px 10px rgba(192, 57, 43, 0.15);
     transform: translateX(4px);
   }
-
   .answer-btn:disabled { cursor: not-allowed; }
-
   .answer-btn.correct {
     background: #e8f5ec;
     border-color: #2e7d4f;
     color: #1e5c37;
     font-weight: 700;
   }
-
   .answer-btn.wrong {
     background: #fbeae8;
     border-color: #c0392b;
@@ -207,7 +211,6 @@
     position: relative;
     z-index: 1;
   }
-
   .text-input {
     flex: 1;
     background: #f4f7fa;
@@ -275,6 +278,31 @@
   .next-btn.show { display: block; }
   .next-btn:hover { background: #1e3a5f; border-color: #1e3a5f; }
 
+  /* ===== Dev skip button ===== */
+  .dev-skip {
+    margin-top: 18px;
+    text-align: right;
+    position: relative;
+    z-index: 1;
+  }
+  .dev-skip button {
+    background: transparent;
+    border: 1px dashed #8a94a6;
+    color: #8a94a6;
+    font-family: 'Courier New', monospace;
+    font-size: 0.75rem;
+    padding: 6px 12px;
+    border-radius: 3px;
+    cursor: pointer;
+    letter-spacing: 1px;
+    transition: all 0.18s;
+  }
+  .dev-skip button:hover {
+    border-color: #c0392b;
+    color: #c0392b;
+    border-style: solid;
+  }
+
   .final-screen {
     text-align: center;
     padding: 25px 0;
@@ -318,89 +346,73 @@
 
 <script>
 /* ============================================================
+   CONFIG
+   ============================================================ */
+const LOGO_PATH = "images/logo.png";  // ← Bleach logo (set to null to hide)
+
+/* ============================================================
    QUIZ DATA
    ============================================================ */
 const QUESTIONS = [
-  {
-    type: "mc",
+  { type: "mc",
     question: "How old was Ichigo at the start of the series?",
-    answers: ["16", "18", "17", "15"],
-    correct: "15"
-  },
-  {
-    type: "mc",
+    answers: ["16", "18", "17", "15"], correct: "15" },
+
+  { type: "mc",
     question: "What was the name of Uryū's grandfather and master?",
-    answers: ["Shūsuke", "Jin", "Sōken", "Muramasa"],
-    correct: "Sōken"
-  },
-  {
-    type: "tf",
+    answers: ["Shūsuke", "Jin", "Sōken", "Muramasa"], correct: "Sōken" },
+
+  { type: "tf",
     question: "The Hōgyoku is often associated with Aizen, but in fact, Kisuke was the one to create the Complete Hōgyoku.",
-    correct: false
-  },
-  {
-    type: "mc",
+    correct: false },
+
+  { type: "mc",
     question: "Which of these Bankai is canonically the first and oldest to exist in the series?",
-    answers: [
-      "Shatatsu Karagara Shigarami no Tsuji",
-      "Katen Kyōkotsu: Karamatsu Shinjū",
-      "Zanka no Tachi",
-      "Shin'uchi: Shirafude Ichimonji"
-    ],
-    correct: "Shin'uchi: Shirafude Ichimonji"
-  },
-  {
-    type: "mc",
+    answers: ["Shatatsu Karagara Shigarami no Tsuji", "Katen Kyōkotsu: Karamatsu Shinjū", "Zanka no Tachi", "Shin'uchi: Shirafude Ichimonji"],
+    correct: "Shin'uchi: Shirafude Ichimonji" },
+
+  { type: "mc",
     question: "Who was the first squad captain of the Gotei 13 that Ichigo encountered after they entered Soul Society?",
     answers: ["Byakuya Kuchiki", "Gin Ichimaru", "Kenpachi Zaraki", "Aizen Sōsuke"],
-    correct: "Gin Ichimaru"
-  },
-  {
-    type: "open",
+    correct: "Gin Ichimaru" },
+
+  { type: "open",
     question: "During Aizen's sentencing following his defeat, he taunted members of Central 46 and consequently got his sentence increased to 20,000 years. What was the original number of years he was given?",
-    accepted: ["18,800", "18800"]
-  },
-  {
-    type: "open",
+    accepted: ["18,800", "18800"] },
+
+  { type: "open",
     image: "images/jugram-angry.jpg",
     question: "Make Jugram happy and spell his family name correctly.",
-    accepted: ["Haschwalth", "haschwalth"]
-  },
-  {
-    type: "mc",
+    accepted: ["Haschwalth", "haschwalth"] },
+
+  { type: "mc",
     question: "Before Kenpachi Zaraki became the captain of Squad 11, how many previous Kenpachi had there been?",
-    answers: ["10", "11", "8", "9"],
-    correct: "10"
-  },
-  {
-    type: "mc",
+    answers: ["10", "11", "8", "9"], correct: "10" },
+
+  { type: "mc",
     question: "What was the name of Rukia's sister?",
-    answers: ["Riruka", "Nozomi", "Senna", "Hisana"],
-    correct: "Hisana"
-  },
-  {
-    type: "mc",
+    answers: ["Riruka", "Nozomi", "Senna", "Hisana"], correct: "Hisana" },
+
+  { type: "mc",
     question: "Who created the Shinigami Research and Development Institute?",
-    answers: ["Mayuri", "Kisuke", "Aizen", "Senjumaru"],
-    correct: "Kisuke"
-  },
-  {
-    type: "mc",
+    answers: ["Mayuri", "Kisuke", "Aizen", "Senjumaru"], correct: "Kisuke" },
+
+  { type: "mc",
     audio: "images/cero.mp3",
     question: "Which of these Arrancar techniques produces this sound?",
-    answers: ["Sonido", "Hierro", "Cero", "Bala"],
-    correct: "Cero"
-  }
+    answers: ["Sonido", "Hierro", "Cero", "Bala"], correct: "Cero" },
+
+  { type: "mc",
+    question: "Which of these Squad 0 members got promoted from a captain during the events in the manga/anime?",
+    answers: ["Kirio Hikifune", "Senjumaru Shutara", "Oetsu Nimaiya", "Tenjiro Kirinji"],
+    correct: "Kirio Hikifune" }
 ];
 
 /* ============================================================
    ENGINE
    ============================================================ */
 function normalize(str) {
-  return String(str)
-    .toLowerCase()
-    .replace(/[,\.\s\-'’]/g, "")
-    .trim();
+  return String(str).toLowerCase().replace(/[,\.\s\-'’]/g, "").trim();
 }
 
 const quizEl = document.getElementById("quiz");
@@ -431,23 +443,25 @@ function renderQuestion() {
       <div class="text-input-row">
         <input type="text" class="text-input" id="openInput" placeholder="Type your answer..." autocomplete="off">
         <button class="submit-btn" id="submitOpen">Submit</button>
-      </div>
-    `;
+      </div>`;
   }
 
   const imageHTML = q.image
-    ? `<img src="${escapeAttr(q.image)}" alt="Question image" class="question-image" onerror="this.style.display='none'">`
-    : "";
+    ? `<img src="${escapeAttr(q.image)}" alt="" class="question-image" onerror="this.style.display='none'">` : "";
 
   const audioHTML = q.audio
     ? `<div class="audio-wrap">
          <button class="audio-play-btn" id="audioPlay">
            <span class="icon">🔊</span><span id="audioLabel">PLAY AUDIO</span>
          </button>
-       </div>`
+       </div>` : "";
+
+  const logoHTML = LOGO_PATH
+    ? `<div class="logo-wrap"><img src="${escapeAttr(LOGO_PATH)}" alt="Bleach" class="logo-img" onerror="this.parentElement.style.display='none'"></div>`
     : "";
 
   quizEl.innerHTML = `
+    ${logoHTML}
     <div class="header">
       <h1>Bleach Quiz</h1>
       <span class="counter">${currentIndex + 1} / ${total}</span>
@@ -462,6 +476,7 @@ function renderQuestion() {
     ${answersHTML}
     <div class="result" id="result"></div>
     <button class="next-btn" id="nextBtn">NEXT →</button>
+    <div class="dev-skip"><button id="devSkip">⚙ DEV: SKIP →</button></div>
   `;
 
   if (q.type === "mc" || q.type === "tf") {
@@ -474,9 +489,7 @@ function renderQuestion() {
     const input = document.getElementById("openInput");
     const submit = document.getElementById("submitOpen");
     submit.addEventListener("click", () => handleOpen(input, q));
-    input.addEventListener("keydown", e => {
-      if (e.key === "Enter") handleOpen(input, q);
-    });
+    input.addEventListener("keydown", e => { if (e.key === "Enter") handleOpen(input, q); });
     input.focus();
   }
 
@@ -503,6 +516,7 @@ function renderQuestion() {
   }
 
   document.getElementById("nextBtn").addEventListener("click", nextQuestion);
+  document.getElementById("devSkip").addEventListener("click", devSkip);
 }
 
 function handleChoice(btn, q) {
@@ -563,6 +577,14 @@ function nextQuestion() {
   else renderQuestion();
 }
 
+/* Dev skip: advances without scoring, no feedback */
+function devSkip() {
+  if (currentAudio) { currentAudio.pause(); currentAudio = null; }
+  currentIndex++;
+  if (currentIndex >= QUESTIONS.length) renderFinal();
+  else renderQuestion();
+}
+
 function renderFinal() {
   if (currentAudio) { currentAudio.pause(); currentAudio = null; }
   const total = QUESTIONS.length;
@@ -574,21 +596,26 @@ function renderFinal() {
   else if (pct >= 40) msg = "Keep training at the Shin'ō Academy.";
   else msg = "Back to the academy for you.";
 
+  const logoHTML = LOGO_PATH
+    ? `<div class="logo-wrap"><img src="${escapeAttr(LOGO_PATH)}" alt="Bleach" class="logo-img" onerror="this.parentElement.style.display='none'"></div>`
+    : "";
+
   quizEl.innerHTML = `
     <div class="final-screen">
+      ${logoHTML}
       <h1>Quiz Complete</h1>
       <div class="divider"></div>
       <div class="divider-red"></div>
       <div class="final-score">${score} / ${total}</div>
       <p class="final-msg">${msg}</p>
       <button class="restart-btn" id="restartBtn">TRY AGAIN</button>
+      <div class="dev-skip"><button id="devSkip">⚙ DEV: SKIP →</button></div>
     </div>
   `;
   document.getElementById("restartBtn").addEventListener("click", () => {
-    currentIndex = 0;
-    score = 0;
-    renderQuestion();
+    currentIndex = 0; score = 0; renderQuestion();
   });
+  document.getElementById("devSkip").addEventListener("click", devSkip);
 }
 
 function escapeHTML(str) {
